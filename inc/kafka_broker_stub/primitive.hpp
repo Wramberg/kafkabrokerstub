@@ -30,7 +30,7 @@ namespace kafka_broker_stub {
 		 */
 		virtual const uint8_t* deserialize(const uint8_t*)
 		{
-			throw std::logic_error("Deserialize() function not implemented");
+			throw std::runtime_error("Deserialize() function not implemented");
 		}
 
 		/**
@@ -38,7 +38,7 @@ namespace kafka_broker_stub {
 		 */
 		virtual uint8_t* serialize(uint8_t*) const
 		{
-			throw std::logic_error("Serialize() function not implemented");
+			throw std::runtime_error("Serialize() function not implemented");
 		}
 
 		/**
@@ -46,7 +46,7 @@ namespace kafka_broker_stub {
 		 */
 		virtual size_t serial_size() const
 		{
-			throw std::logic_error("Serial_size() function not implemented");
+			throw std::runtime_error("Serial_size() function not implemented");
 		}
 
 	};
@@ -221,7 +221,7 @@ namespace kafka_broker_stub {
 			{
 				return m_value;
 			}
-			
+
 		private:
 			int64_t m_value;
 		};
@@ -252,7 +252,7 @@ namespace kafka_broker_stub {
 				{
 					m_value.clear();
 				}
-				
+
 				return data + 2;
 			}
 
@@ -315,7 +315,7 @@ namespace kafka_broker_stub {
 				{
 					m_value.clear();
 				}
-				
+
 				return start + 4;
 			}
 
@@ -375,7 +375,7 @@ namespace kafka_broker_stub {
 			const uint8_t* deserialize(const uint8_t* data)
 			{
 				m_value.clear();
-				
+
 				// Read the length of the array
 				int32_t length = util::read_type<int32_t>(data);
 
