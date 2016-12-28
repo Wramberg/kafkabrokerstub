@@ -1,0 +1,93 @@
+language: cpp
+sudo: false
+
+matrix:
+  include:
+    - os: linux
+      env: TASK=BUILD COMPILER_NAME=g++ COMPILER_VERSION=6
+      addons:
+        apt:
+          packages:
+            - g++-6
+            - valgrind
+            - cppcheck
+          sources: &sources
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise
+            - llvm-toolchain-precise-3.8
+            - llvm-toolchain-precise-3.5
+
+    - os: linux
+      env: TASK=BUILD COMPILER_NAME=g++ COMPILER_VERSION=5
+      addons:
+        apt:
+          packages:
+            - g++-5
+            - valgrind
+          sources: *sources
+
+    - os: linux
+      env: TASK=BUILD COMPILER_NAME=g++ COMPILER_VERSION=4.4
+      addons:
+        apt:
+          packages:
+            - g++-4.4
+            - valgrind
+          sources: *sources
+
+    - os: linux
+      env: TASK=BUILD COMPILER_NAME=clang++ COMPILER_VERSION=3.8
+      addons:
+        apt:
+          packages:
+            - clang-3.8
+            - valgrind
+          sources: *sources
+
+    - os: linux
+      env: TASK=BUILD COMPILER_NAME=clang++ COMPILER_VERSION=3.5
+      addons:
+        apt:
+          packages:
+            - clang-3.5
+            - valgrind
+          sources: *sources
+
+    - os: linux
+      dist: trusty
+      env: TASK=VARIOUS
+      addons:
+        apt:
+          packages:
+          sources: *sources
+
+
+before_install:
+
+install:
+   - pip install --user cpp-coveralls
+
+before_script:
+   - uname -a
+   - if [ "$TASK" == "BUILD" ]; then export CXX=${COMPILER_NAME}-${COMPILER_VERSION}; fi
+   - ${CXX} --version
+   - if [ "$TASK" == "BUILD" ]; then valgrind --version; fi
+   - pip show cpp-coveralls
+
+script:
+   - cd test
+   - make clean
+   - if [ "$TASK" == "BUILD" ]; then make tests; fi
+   - if [ "$TASK" == "BUILD" ]; then make valgrind; fi
+   - if [ "$COMPILER_NAME" == "g++" ] && [ "$COMPILER_VERSION" == "6" ]; then make cppcheck; fi
+   - if [ "$TASK" == "VARIOUS" ]; then make coverage; fi
+
+after_success:
+
+after_failure:
+
+after_script:
+   - ls -al
+
+notifications:
+  email: false
