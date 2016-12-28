@@ -29,18 +29,21 @@ tests:
 	$(MAKE) primitive_test.o
 	$(MAKE) headers_test.o
 	$(MAKE) metadata_test.o
+	$(MAKE) produce_test.o
 
 valgrind: tests
 	$(VALGRIND) $(VALGRIND_OPTS) ./util_test.o
 	$(VALGRIND) $(VALGRIND_OPTS) ./primitive_test.o
 	$(VALGRIND) $(VALGRIND_OPTS) ./headers_test.o
 	$(VALGRIND) $(VALGRIND_OPTS) ./metadata_test.o
+	$(VALGRIND) $(VALGRIND_OPTS) ./produce_test.o
 
 coverage:
 	$(MAKE) util_test.o COVERAGE=Y
 	$(MAKE) primitive_test.o COVERAGE=Y
 	$(MAKE) headers_test.o COVERAGE=Y
 	$(MAKE) metadata_test.o COVERAGE=Y
+	$(MAKE) produce_test.o COVERAGE=Y
 	(cd .. && python test/upload_coverage_to_coveralls.py -i inc)
 
 cppcheck:
@@ -48,6 +51,8 @@ cppcheck:
 
 clean:
 	$(RM) *.o
+	$(RM) *.gcno
+	$(RM) *.gcda
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $< -o $@

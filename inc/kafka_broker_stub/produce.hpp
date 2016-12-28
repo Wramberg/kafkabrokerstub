@@ -1,5 +1,5 @@
-#ifndef KAFKACPPBROKERSTUB_PRODUCE_HPP_INC_
-#define KAFKACPPBROKERSTUB_PRODUCE_HPP_INC_
+#ifndef KAFKA_BROKER_STUB_PRODUCE_HPP_INC_
+#define KAFKA_BROKER_STUB_PRODUCE_HPP_INC_
 
 /**
  * Definitions used for handling produce requests and responses.
@@ -13,7 +13,17 @@ namespace kafka_broker_stub { namespace produce {
 	class message : public kafka_elementI
 	{
 	public:
-		message() { }
+		message():
+			m_offset(),
+			m_message_size(),
+			m_crc(),
+			m_magicbyte(),
+			m_attributes(),
+			m_key(),
+			m_value()
+		{
+
+		}
 
 		const uint8_t* deserialize(const uint8_t* data)
 		{
@@ -75,7 +85,12 @@ namespace kafka_broker_stub { namespace produce {
 	class partition_record : public kafka_elementI
 	{
 	public:
-		partition_record() { }
+		partition_record():
+			m_partition(),
+			m_record()
+		{
+
+		}
 
 		const uint8_t* deserialize(const uint8_t* data)
 		{
@@ -102,7 +117,12 @@ namespace kafka_broker_stub { namespace produce {
 	class topic_record : public kafka_elementI
 	{
 	public:
-		topic_record() { }
+		topic_record():
+			m_topic_name(),
+			m_partition_records()
+		{
+
+		}
 
 		const uint8_t* deserialize(const uint8_t* data)
 		{
@@ -128,7 +148,14 @@ namespace kafka_broker_stub { namespace produce {
 	class request_v0 : public kafka_elementI
 	{
 	public:
-		request_v0() { }
+		request_v0():
+			m_req_header(),
+			m_acks(),
+			m_timeout(),
+			m_topic_records()
+		{
+
+		}
 
 		const uint8_t* deserialize(const uint8_t* data)
 		{
@@ -169,7 +196,13 @@ namespace kafka_broker_stub { namespace produce {
 	class partition_result : public kafka_elementI
 	{
 	public:
-		partition_result() { }
+		partition_result():
+			m_partition(),
+			m_err_code(),
+			m_offset()
+		{
+
+		}
 
 		partition_result(primitive::int32 partition, primitive::int16 err_code, primitive::int64 offset):
 			m_partition(partition),
@@ -205,7 +238,12 @@ namespace kafka_broker_stub { namespace produce {
 	class topic_result : public kafka_elementI
 	{
 	public:
-		topic_result() { }
+		topic_result():
+			m_topic_name(),
+			m_part_results()
+		{
+
+		}
 
 		topic_result(primitive::string topic, const primitive::array<partition_result>& part_results):
 			m_topic_name(topic),

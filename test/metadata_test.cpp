@@ -88,6 +88,9 @@ private:
 
 		kbs::metadata::partition partition;
 		ASSERT_EQ(partition.serial_size(), static_cast<size_t>(18));
+
+		kbs::metadata::topic topic;
+		ASSERT_EQ(topic.serial_size(), static_cast<size_t>(8));
 	}
 
 	void tests()
