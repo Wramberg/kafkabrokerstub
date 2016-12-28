@@ -65,6 +65,7 @@ matrix:
 before_install:
 
 install:
+   - pip install --user requests
 
 before_script:
    - uname -a
