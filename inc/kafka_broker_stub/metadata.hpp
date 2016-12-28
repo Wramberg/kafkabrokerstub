@@ -63,7 +63,7 @@ namespace kafka_broker_stub { namespace metadata {
 
 		}
 
-		broker(primitive::int32 node, const primitive::string& host, primitive::int32 port):
+		broker(const primitive::int32& node, const primitive::string& host, const primitive::int32& port):
 			m_node_id(node),
 			m_host(host),
 			m_port(port)
@@ -109,8 +109,9 @@ namespace kafka_broker_stub { namespace metadata {
 
 		}
 
-		partition(primitive::int16 err_code, primitive::int32 id, primitive::int32 leader,
-					 const primitive::array<primitive::int32>& replicas, const primitive::array<primitive::int32>& isr):
+		partition(const primitive::int16& err_code, const primitive::int32& id,
+					 const primitive::int32& leader, const primitive::array<primitive::int32>& replicas,
+					 const primitive::array<primitive::int32>& isr):
 			m_err_code(err_code),
 			m_id(id),
 			m_leader(leader),
@@ -162,7 +163,8 @@ namespace kafka_broker_stub { namespace metadata {
 
 		}
 
-		topic(primitive::int16 err_code, const primitive::string& tname, const primitive::array<partition>& partitions):
+		topic(const primitive::int16& err_code, const primitive::string& tname,
+			   const primitive::array<partition>& partitions):
 			m_err_code(err_code),
 			m_name(tname),
 			m_partitions(partitions)
