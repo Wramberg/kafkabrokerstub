@@ -295,7 +295,8 @@ namespace kafka_broker_stub {
 			// Deserialize request
 			metadata::request_v0 req;
 			req.deserialize(data);
-			printf("[RawKafkaBrokerStub][%i] Got metadata request from [%s] with corr. ID [%i]\n", m_node_id, req.header().client_id().c_str(), (int)req.header().correlation_id());
+			printf("[RawKafkaBrokerStub][%i] Got metadata request from [%s] with corr. ID [%i]\n",
+				    m_node_id, req.header().client_id().c_str(), (int)req.header().correlation_id());
 
 			// Prepare list of topics for response
 			primitive::array<metadata::topic> topics;
