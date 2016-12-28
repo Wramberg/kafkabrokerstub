@@ -28,9 +28,6 @@ private:
 
 	void response_test()
 	{
-		// 00000045
-
-
 		// Make broker array
 		kbs::metadata::broker broker(1, "localhost", 9092);
 		kbs::primitive::array<kbs::metadata::broker> broker_arr;
@@ -83,10 +80,21 @@ private:
 		ASSERT_EQ(memcmp(data, cmp, sizeof(cmp)), 0);
 	}
 
+	void default_ctor_tests()
+	{
+		// Just some silly tests of the default ctor for code coverage
+		kbs::metadata::broker broker;
+		ASSERT_EQ(broker.serial_size(), static_cast<size_t>(10));
+
+		kbs::metadata::partition partition;
+		ASSERT_EQ(partition.serial_size(), static_cast<size_t>(18));
+	}
+
 	void tests()
 	{
 		request_test();
 		response_test();
+		default_ctor_tests();
 	}
 };
 
