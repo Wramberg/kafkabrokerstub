@@ -10,7 +10,7 @@ The broker stub currently supports
 - Produce requests [API version 0]
 
 ## Future Development
-The stub was developed to support exactly what was needed and nothing more. The basis for future development has been layed however. The stub is structured in a hierarchical fashion (think composite design pattern) where all primitive types have been implemented. It should thus be straightforward to add support for more requests/versions.
+The stub was developed to support exactly what was needed and nothing more. The basis for future development has been laid however. The stub is structured in a hierarchical fashion (think composite design pattern) where all primitive types have been implemented. It should thus be straightforward to add support for more requests/versions.
 
 ## Usage
 TBD
