@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/Wramberg/kafkabrokerstub.svg?branch=master)](https://travis-ci.org/Wramberg/kafkabrokerstub)
 [![Coverage Status](https://coveralls.io/repos/github/Wramberg/kafkabrokerstub/badge.svg?branch=master)](https://coveralls.io/github/Wramberg/kafkabrokerstub?branch=master)
 
-A simple C++ Kafka broker stub for isolated unittests. Note that the repo is still under construction.
+A simple, header-only C++ Kafka broker stub for isolated unittests. Note that the repo is still under construction.
 
 ## Support
 The broker stub currently supports

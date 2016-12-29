@@ -18,8 +18,8 @@ private:
 			              0x07, 0x72, 0x64, 0x6b, 0x61, 0x66, 0x6b, 0x61, 0x00, 0x00, 0x00, 0x01, 0x00,
 			              0x04, 0x74, 0x65, 0x73, 0x74};
 
-		// Decode the request header in the message - note that the first four bytes describe the
-      // length of the message which is not part of the request
+		// Decode the request - note that the first four bytes describe the length
+      // of the message which is not part of the request
 		kbs::metadata::request_v0 meta_req;
 		ASSERT_EQ(meta_req.deserialize(req+4), const_cast<const uint8_t*>(req+4+27));
 		ASSERT_EQ(meta_req.topics().size(), static_cast<size_t>(1));
