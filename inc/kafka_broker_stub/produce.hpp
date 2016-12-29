@@ -37,27 +37,27 @@ namespace kafka_broker_stub { namespace produce {
 			return data;
 		}
 
-		primitive::int64 offset() const
+		const primitive::int64& offset() const
 		{
 			return m_offset;
 		}
 
-		primitive::int32 message_size() const
+		const primitive::int32& message_size() const
 		{
 			return m_message_size;
 		}
 
-		primitive::int32 crc() const
+		const primitive::int32& crc() const
 		{
 			return m_crc;
 		}
 
-		primitive::int8 magicbyte() const
+		const primitive::int8& magicbyte() const
 		{
 			return m_magicbyte;
 		}
 
-		primitive::int8 attributes() const
+		const primitive::int8& attributes() const
 		{
 			return m_attributes;
 		}
@@ -171,12 +171,12 @@ namespace kafka_broker_stub { namespace produce {
 			return m_req_header;
 		}
 
-		primitive::int16 acks() const
+		const primitive::int16& acks() const
 		{
 			return m_acks;
 		}
 
-		primitive::int32 timeout() const
+		const primitive::int32& timeout() const
 		{
 			return m_timeout;
 		}
@@ -204,7 +204,8 @@ namespace kafka_broker_stub { namespace produce {
 
 		}
 
-		partition_result(primitive::int32 partition, primitive::int16 err_code, primitive::int64 offset):
+		partition_result(const primitive::int32& partition, const primitive::int16& err_code,
+			              const primitive::int64& offset):
 			m_partition(partition),
 			m_err_code(err_code),
 			m_offset(offset)
@@ -245,7 +246,7 @@ namespace kafka_broker_stub { namespace produce {
 
 		}
 
-		topic_result(primitive::string topic, const primitive::array<partition_result>& part_results):
+		topic_result(const primitive::string& topic, const primitive::array<partition_result>& part_results):
 			m_topic_name(topic),
 			m_part_results(part_results)
 		{
@@ -275,7 +276,7 @@ namespace kafka_broker_stub { namespace produce {
 	class response_v0 : public kafka_elementI
 	{
 	public:
-		response_v0(primitive::int32 corr_id, const primitive::array<topic_result>& topic_results):
+		response_v0(const primitive::int32& corr_id, const primitive::array<topic_result>& topic_results):
 			m_resp_header(corr_id),
 			m_topic_results(topic_results)
 			// m_throttle_time(0)

@@ -70,13 +70,54 @@ private:
 
 	void response_test()
 	{
+		// Make partition result array
+		kbs::produce::partition_result part_res(8, 7, 1);
+		kbs::primitive::array<kbs::produce::partition_result> part_arr;
+		part_arr.push_back(part_res);
 
+		// Make topic result array
+		kbs::produce::topic_result topic_res(kbs::primitive::string("test"), part_arr);
+		kbs::primitive::array<kbs::produce::topic_result> topic_arr;
+		topic_arr.push_back(topic_res);
+
+		// Make response
+		kbs::produce::response_v0 resp(3, topic_arr);
+
+		// Serialize response into buffer
+		uint8_t data[1024];
+		ASSERT_EQ(resp.serialize(data), static_cast<uint8_t*>(data+32));
+		ASSERT_EQ(resp.serial_size(), static_cast<size_t>(32));
+
+		// Check the data against a modified tcpdump capture from an actual kafka broker
+		uint8_t cmp[] = {
+			0x00, 0x00, 0x00, 0x03, // Correlation ID
+			0x00, 0x00, 0x00, 0x01, // Array of responses start
+				0x00, 0x04, 0x74, 0x65, 0x73, 0x74, // Topic name string
+				0x00, 0x00, 0x00, 0x01, // Array of partition responses start
+					0x00, 0x00, 0x00, 0x08, // Partition ID
+					0x00, 0x07, // Partition error code
+					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 // Offset
+		};
+
+		ASSERT_EQ(memcmp(data, cmp, sizeof(cmp)), 0);
 	}
+
+	void default_ctor_tests()
+	{
+		// Just some silly tests of the default ctor for code coverage
+		kbs::produce::topic_result topic_result;
+		ASSERT_EQ(topic_result.serial_size(), static_cast<size_t>(6));
+
+		kbs::produce::partition_result partition_result;
+		ASSERT_EQ(partition_result.serial_size(), static_cast<size_t>(14));
+	}
+
 
 	void tests()
 	{
 		request_test();
 		response_test();
+		default_ctor_tests();
 	}
 };
 
