@@ -8,15 +8,17 @@
 #include "util.hpp"
 #include <list>
 #include <string>
-
-#define RESP_MAX_SIZE 4096
+#include <stdio.h>
 
 namespace kafka_broker_stub {
+
+	// Maximum size of a response message
+	const size_t RESP_MAX_SIZE = 4096;
 
 	/**
 	 * Simple key value pair
 	 *
-	 * This is returned by the raw broker stub when looking up data in partitions
+	 * This is returned by the broker stub when looking up data in partitions
 	 */
 	class key_value_pair
 	{
@@ -50,6 +52,7 @@ namespace kafka_broker_stub {
 	{
 	public:
 		partition(int32_t part_id, int32_t leader_id):
+			m_data(),
 			m_part_id(part_id),
 			m_leader_id(leader_id)
 		{
@@ -90,7 +93,8 @@ namespace kafka_broker_stub {
 	{
 	public:
 		topic(const std::string& n, const std::vector<partition>& parts):
-			m_name(n)
+			m_name(n),
+			m_partitions()
 		{
 			for (size_t i=0; i<parts.size(); ++i)
 			{
@@ -134,16 +138,19 @@ namespace kafka_broker_stub {
 	};
 
 	/**
-	 * Raw Kafka Broker Stub
+	 * Broker Stub
 	 *
 	 * This stub implements the necessary function to parse the kafka wire
 	 * protocol.
 	 */
-	class RawBrokerStub
+	class broker_stub
 	{
 	public:
-		RawBrokerStub(int32_t nodeId, const char* host, int32_t port):
-			m_node_id(nodeId)
+		broker_stub(int32_t nodeId, const char* host, int32_t port):
+			m_node_id(nodeId),
+			m_topics(),
+			m_brokers(),
+			m_broker_ids()
 		{
 			m_broker_ids.push_back(nodeId);
 			m_brokers.push_back(metadata::broker(nodeId, host, port));
@@ -151,9 +158,6 @@ namespace kafka_broker_stub {
 
 		/**
 		 * Add topic to the broker stub
-		 *
-		 * @param name is the name of the topic to be added
-		 * @param partitions is a list of leaders for the partitions to be added
 		 */
 		bool add_topic(const std::string& name, const std::vector<partition>& partitions)
 		{
@@ -206,15 +210,15 @@ namespace kafka_broker_stub {
 			while ((cur_data + 4) < msg_end)
 			{
 				// Read message size
-				int32_t msg_size = util::readType<int32_t>(cur_data);
+				int32_t msg_size = util::read_type<int32_t>(cur_data);
 				if (msg_size < 4)
 				{
-					printf("[RawKafkaBrokerStub][%i] Error message size < 4\n", m_node_id);
+					printf("[KafkaBrokerStub][%i] Error message size < 4\n", m_node_id);
 					return -1;
 				}
 
 				// Check if we have received enough bytes to parse message
-				if ((size_t)(msg_size+4) > total_size)
+				if (static_cast<size_t>(msg_size+4) > total_size)
 				{
 					// We need more of the input strem to parse this packet so return
 					// and wait for next call
@@ -222,7 +226,7 @@ namespace kafka_broker_stub {
 				}
 
 				// Check if message size seems resonable
-				if (cur_data + (size_t)(msg_size+4) > msg_end)
+				if ((cur_data + static_cast<size_t>(msg_size+4)) > msg_end)
 				{
 					return bytes_read;
 				}
@@ -243,8 +247,8 @@ namespace kafka_broker_stub {
 				memset(response_buf, 0, sizeof(response_buf));
 
 				// Read api key and handle message accordingly
-				int16_t api_key = util::readType<int16_t>(cur_data);
-				int16_t api_version = util::readType<int16_t>(cur_data+2);
+				int16_t api_key = util::read_type<int16_t>(cur_data);
+				int16_t api_version = util::read_type<int16_t>(cur_data+2);
 				switch (api_key)
 				{
 					case 0:
@@ -254,21 +258,22 @@ namespace kafka_broker_stub {
 						response_size = handle_metadata_request(cur_data, api_version, response_buf+4, RESP_MAX_SIZE-4);
 						break;
 					default:
-						printf("[RawKafkaBrokerStub][%i] Got unknown API key [%i]\n", m_node_id, api_key);
+						printf("[KafkaBrokerStub][%i] Got unknown API key [%i]\n", m_node_id, api_key);
 						break;
 				}
 
 				if (response_size < 0)
 				{
-					printf("[RawKafkaBrokerStub][%i] Error during parsing [%i]\n", m_node_id, response_size);
+					printf("[KafkaBrokerStub][%i] Error during parsing [%i]\n", m_node_id, response_size);
 					return -1;
 				}
 
 				// Write size in head of response buffer
 				if (response_size > 0)
 				{
-					util::writeType<int32_t>(response_size, response_buf);
-					responses.push_back(std::string(reinterpret_cast<const char*>(response_buf), response_size+4));
+					util::write_type<int32_t>(response_size, response_buf);
+					responses.push_back(std::string(reinterpret_cast<const char*>(response_buf),
+						                             static_cast<size_t>(response_size)+4));
 				}
 
 				// Update how many bytes we parsed
@@ -283,20 +288,23 @@ namespace kafka_broker_stub {
 
 	private:
 
-		int handle_metadata_request(const uint8_t* data, int16_t api_version, uint8_t* resp_buf, size_t resp_size)
+		int handle_metadata_request(const uint8_t* data, int16_t api_version, uint8_t* resp_buf,
+			                         size_t resp_size)
 		{
 			// We only support metadata response version 0
 			if (api_version != 0)
 			{
-				printf("[RawKafkaBrokerStub][%i] Received metadata request with unsupported API version [%i]\n", m_node_id, api_version);
+				printf("[KafkaBrokerStub][%i] Received metadata request with unsupported API version [%i]\n",
+					    m_node_id, api_version);
 				return 0;
 			}
 
 			// Deserialize request
 			metadata::request_v0 req;
 			req.deserialize(data);
-			printf("[RawKafkaBrokerStub][%i] Got metadata request from [%s] with corr. ID [%i]\n",
-				    m_node_id, req.header().client_id().c_str(), (int)req.header().correlation_id());
+			printf("[KafkaBrokerStub][%i] Got metadata request from [%s] with corr. ID [%i]\n",
+				    m_node_id, req.header().client_id().c_str(),
+				    static_cast<int>(req.header().correlation_id()));
 
 			// Prepare list of topics for response
 			primitive::array<metadata::topic> topics;
@@ -304,7 +312,7 @@ namespace kafka_broker_stub {
 			// Insert metadata in topic array - if array is empty all topics were requested
 			if (req.topics().size() == 0)
 			{
-				printf("[RawKafkaBrokerStub][%i] - Request for all topics\n", m_node_id);
+				printf("[KafkaBrokerStub][%i] - Request for all topics\n", m_node_id);
 				for (size_t i=0; i<m_topics.size(); i++)
 				{
 					// Loop over partitions and generate metadata array
@@ -326,7 +334,7 @@ namespace kafka_broker_stub {
 			{
 				for (size_t i=0; i<req.topics().size(); i++)
 				{
-					printf("[RawKafkaBrokerStub][%i] - Request for topic [%s]\n",
+					printf("[KafkaBrokerStub][%i] - Request for topic [%s]\n",
 						    m_node_id, req.topics()[i].c_str());
 					topics.push_back(get_topic_metadata(req.topics()[i]));
 				}
@@ -339,7 +347,7 @@ namespace kafka_broker_stub {
 			size_t msg_size = resp.serial_size();
 			if (msg_size > resp_size)
 			{
-				printf("[RawKafkaBrokerStub][%i] Response buffer too small\n", m_node_id);
+				printf("[KafkaBrokerStub][%i] Response buffer too small\n", m_node_id);
 				return 0;
 			}
 
@@ -353,7 +361,7 @@ namespace kafka_broker_stub {
 			// We only support produce in version 0
 			if (api_version != 0)
 			{
-				printf("[RawKafkaBrokerStub][%i] Received produce request with unsupported API version [%i]\n",
+				printf("[KafkaBrokerStub][%i] Received produce request with unsupported API version [%i]\n",
 					    m_node_id, api_version);
 				return 0;
 			}
@@ -382,7 +390,8 @@ namespace kafka_broker_stub {
 					continue;
 				}
 
-				// Pull partition records out of the topic record from the request (we are looping over topic records)
+				// Pull partition records out of the topic record from the request
+				// (we are looping over topic records)
 				primitive::array<produce::partition_record> partition_records = topic_record.partition_records();
 				for (size_t k=0; k<partition_records.size(); k++)
 				{
@@ -390,7 +399,7 @@ namespace kafka_broker_stub {
 					produce::partition_record record = partition_records[i];
 
 					// Check if the requested partitions exists
-					partition* part = top->get_partition_writeable(record.partition());
+					partition* part = top->get_partition_writeable(static_cast<size_t>(record.partition()));
 					if (part == NULL)
 					{
 						// ToDo: Pushback error to results
@@ -427,7 +436,7 @@ namespace kafka_broker_stub {
 			size_t msg_size = resp.serial_size();
 			if (msg_size > resp_size)
 			{
-				printf("[RawKafkaBrokerStub][%i] Response buffer too small\n", m_node_id);
+				printf("[KafkaBrokerStub][%i] Response buffer too small\n", m_node_id);
 				return 0;
 			}
 
@@ -483,4 +492,4 @@ namespace kafka_broker_stub {
 
 }
 
-#endif // KAFKACPPBROKERSTUB_HPP_INCLUDED
+#endif

@@ -12,6 +12,12 @@
       this->assert_equal(a, b, __FILE__, __LINE__);\
    } while(0)
 
+#define ASSERT_NEQ(a, b)\
+   do \
+   { \
+      this->assert_not_equal(a, b, __FILE__, __LINE__);\
+   } while(0)
+
 namespace kafka_broker_stub { namespace test {
 
 	class suite
@@ -60,6 +66,20 @@ namespace kafka_broker_stub { namespace test {
 				std::cout << "Assert equal failed [" << file << ":" << line << "] ";
 				std::cout << "[" << reinterpret_cast<const size_t>(a) << " == ";
 				std::cout << reinterpret_cast<const size_t>(b) << "]\n";
+				m_num_fail++;
+				return;
+			}
+
+			m_num_pass++;
+		}
+
+		template <typename T>
+		void assert_not_equal(const T& a, const T& b, const char* file, int line)
+		{
+			if (a == b)
+			{
+				std::cout << "Assert equal failed [" << file << ":" << line << "] ";
+				std::cout << "[" << a << " != " << b << "]\n";
 				m_num_fail++;
 				return;
 			}
