@@ -51,10 +51,6 @@ private:
 		ASSERT_NEQ(top->get_partition(0), static_cast<const kbs::partition*>(NULL));
 		ASSERT_NEQ(top->get_partition(1), static_cast<const kbs::partition*>(NULL));
 		ASSERT_EQ(top->get_partition(2), static_cast<const kbs::partition*>(NULL));
-
-		ASSERT_NEQ(top->get_partition_writeable(0), static_cast<kbs::partition*>(NULL));
-		ASSERT_NEQ(top->get_partition_writeable(1), static_cast<kbs::partition*>(NULL));
-		ASSERT_EQ(top->get_partition_writeable(2), static_cast<kbs::partition*>(NULL));
 	}
 
 	void metadata_v0_test()
@@ -176,12 +172,12 @@ private:
       ASSERT_EQ(ret, static_cast<int>(0));
 
       // Invalid message size in data
-      uint8_t bad_size[4] = {0};
+      uint8_t bad_size[5] = {0};
       ret = m_stub->handle_data(bad_size, sizeof(bad_size), responses);
       ASSERT_EQ(ret, static_cast<int>(-1));
 
       // Good size but need more of input stream before message can be parsed
-      uint8_t good_size[4] = {0x00, 0x00, 0x00, 0x10};
+      uint8_t good_size[5] = {0x00, 0x00, 0x00, 0x10, 0x00};
       ret = m_stub->handle_data(good_size, sizeof(good_size), responses);
       ASSERT_EQ(ret, static_cast<int>(0));
 	}
