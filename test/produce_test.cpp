@@ -112,7 +112,6 @@ private:
 		ASSERT_EQ(partition_result.serial_size(), static_cast<size_t>(14));
 	}
 
-
 	void tests()
 	{
 		request_test();

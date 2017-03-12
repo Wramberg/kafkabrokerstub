@@ -37,7 +37,7 @@ namespace kafka_broker_stub { namespace test {
 		{
 			printf("\n------ [%s] ------\n", m_name.c_str());
 			tests();
-			printf("Passed: [%lu] Failed: [%lu]\n\n", m_num_pass, m_num_fail);
+			printf("Passed: [%lu] - Failed: [%lu]\n\n", m_num_pass, m_num_fail);
 			if (m_num_fail > 0)
 			{
 				exit(EXIT_FAILURE);

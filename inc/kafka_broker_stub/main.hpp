@@ -198,7 +198,7 @@ namespace kafka_broker_stub {
 		int handle_data(const uint8_t* data, size_t total_size, std::vector<std::string>& responses)
 		{
 			// If message size is under 4 bytes we cannot parse anything
-			if (total_size < 4)
+			if ((data == NULL) || (total_size < 4))
 				return 0;
 
 			// Keep track of end address of message
