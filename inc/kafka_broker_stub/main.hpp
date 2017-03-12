@@ -218,16 +218,10 @@ namespace kafka_broker_stub {
 				}
 
 				// Check if we have received enough bytes to parse message
-				if (static_cast<size_t>(msg_size+4) > total_size)
+				if ((cur_data + static_cast<size_t>(msg_size+4)) > msg_end)
 				{
 					// We need more of the input strem to parse this packet so return
 					// and wait for next call
-					return bytes_read;
-				}
-
-				// Check if message size seems resonable
-				if ((cur_data + static_cast<size_t>(msg_size+4)) > msg_end)
-				{
 					return bytes_read;
 				}
 
